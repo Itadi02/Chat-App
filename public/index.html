@@ -1,7 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Chat — Live</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -63,8 +71,13 @@
         display: flex;
         flex-direction: column;
         height: 100vh;
+        /* Use dvh where supported for correct mobile height */
+        height: 100dvh;
         max-width: 720px;
         margin: 0 auto;
+        /* Safe areas for notch / home indicator */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
       }
 
       /* ── HEADER ── */
@@ -107,6 +120,7 @@
 
       .header-info {
         flex: 1;
+        min-width: 0;
       }
       .header-name {
         font-family: "Syne", sans-serif;
@@ -128,6 +142,7 @@
         background: var(--accent3);
         border-radius: 50%;
         box-shadow: 0 0 8px var(--accent3);
+        flex-shrink: 0;
       }
 
       .header-actions {
@@ -164,6 +179,7 @@
         overflow-x: hidden;
         padding: 24px 20px 16px;
         scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
       }
       #scroll-area::-webkit-scrollbar {
         width: 4px;
@@ -565,96 +581,111 @@
         font-weight: 700;
         margin-left: 6px;
       }
-      /* ================= RESPONSIVE FIX ================= */
 
+      /* =====================================================
+         RESPONSIVE — only layout/sizing changes below,
+         all colours, animations and logic are untouched
+         ===================================================== */
+
+      /* Tablets & large phones (≤ 768px) */
       @media (max-width: 768px) {
         #app {
           max-width: 100%;
         }
-
         #header {
           padding: 14px 16px;
         }
-
         .header-name {
           font-size: 14px;
         }
-
         .header-status {
           font-size: 10px;
         }
-
         #scroll-area {
           padding: 16px 12px 10px;
         }
-
         .msg-bubble-wrap {
           max-width: 85%;
         }
-
         .msg-bubble {
           font-size: 13px;
           padding: 8px 12px;
         }
-
         .msg-avatar {
           width: 24px;
           height: 24px;
           font-size: 9px;
         }
-
         #compose {
           padding: 10px 10px 14px;
         }
-
         .compose-row {
           padding: 5px 5px 5px 12px;
         }
-
         #input {
-          font-size: 13px;
+          font-size: 16px; /* prevents iOS auto-zoom on focus */
         }
-
         #send-btn {
           width: 34px;
           height: 34px;
         }
-
         .attach-btn {
           width: 30px;
           height: 30px;
         }
-
+        /* Scroll btn: stay near right edge on small screens */
         #scroll-btn {
           right: 16px;
           bottom: 80px;
         }
+        /* Toast: prevent overflow on narrow screens */
+        #toast {
+          max-width: calc(100vw - 40px);
+          white-space: normal;
+          text-align: center;
+          bottom: 80px;
+        }
       }
 
-      /* Extra small devices */
+      /* Small phones (≤ 480px) */
       @media (max-width: 480px) {
         .msg-bubble-wrap {
           max-width: 90%;
         }
-
         .msg-bubble {
           font-size: 12.5px;
         }
-
         .header-actions {
           gap: 4px;
         }
-
         .icon-btn {
           width: 30px;
           height: 30px;
         }
+        .avatar-ring {
+          width: 34px;
+          height: 34px;
+        }
       }
 
-      /* Prevent zoom issues on mobile */
-      input,
-      textarea {
-        font-size: 16px;
+      /* Landscape phones — shorter vertical space */
+      @media (max-height: 500px) and (orientation: landscape) {
+        #header {
+          padding: 8px 16px;
+        }
+        #compose {
+          padding: 6px 10px 8px;
+        }
+        #scroll-area {
+          padding: 10px 12px 8px;
+        }
+      }
+
+      /* Desktop sidebar feel (> 720px wide) */
+      @media (min-width: 720px) {
+        #scroll-btn {
+          right: calc(50% - 348px);
+        }
       }
     </style>
   </head>
@@ -1267,6 +1298,14 @@
           duration: 0.3,
         });
       });
+
+      // ── VIRTUAL KEYBOARD: keep compose above keyboard on mobile ────
+      if ("visualViewport" in window) {
+        window.visualViewport.addEventListener("resize", () => {
+          const app = document.getElementById("app");
+          app.style.height = window.visualViewport.height + "px";
+        });
+      }
     </script>
   </body>
 </html>
