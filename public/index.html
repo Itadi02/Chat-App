@@ -1,16 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
-    />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Chat — Live</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,12 +29,6 @@
         --msg-in-bg: #1a1a24;
         --radius: 20px;
         --radius-sm: 12px;
-
-        /* Responsive sizing tokens */
-        --header-h: 68px;
-        --compose-h: 76px;
-        --safe-top: env(safe-area-inset-top, 0px);
-        --safe-bottom: env(safe-area-inset-bottom, 0px);
       }
 
       *,
@@ -52,24 +37,15 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        -webkit-tap-highlight-color: transparent;
       }
 
-      html {
-        height: 100%;
-        height: -webkit-fill-available;
-      }
-
+      html,
       body {
         height: 100%;
-        height: -webkit-fill-available;
         background: var(--bg);
         color: var(--text);
         font-family: "DM Sans", sans-serif;
         overflow: hidden;
-        /* Prevent bounce scroll on iOS */
-        overscroll-behavior: none;
-        touch-action: manipulation;
       }
 
       /* ── ANIMATED BACKGROUND ── */
@@ -86,34 +62,27 @@
         z-index: 1;
         display: flex;
         flex-direction: column;
-        height: 100%;
-        height: -webkit-fill-available;
-        /* Clamp width: fills small screens, caps at 720px on large screens */
+        height: 100vh;
         max-width: 720px;
         margin: 0 auto;
-        /* Pad for notch / dynamic island */
-        padding-top: var(--safe-top);
-        padding-bottom: var(--safe-bottom);
       }
 
       /* ── HEADER ── */
       #header {
         display: flex;
         align-items: center;
-        gap: clamp(8px, 2vw, 14px);
-        padding: clamp(10px, 2vh, 18px) clamp(12px, 4vw, 24px)
-          clamp(8px, 1.5vh, 14px);
+        gap: 14px;
+        padding: 18px 24px 14px;
         border-bottom: 1px solid var(--border);
         backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
         background: rgba(10, 10, 15, 0.6);
         flex-shrink: 0;
       }
 
       .avatar-ring {
         position: relative;
-        width: clamp(34px, 6vw, 42px);
-        height: clamp(34px, 6vw, 42px);
+        width: 42px;
+        height: 42px;
         flex-shrink: 0;
       }
       .avatar-ring svg {
@@ -132,25 +101,21 @@
         justify-content: center;
         font-family: "Syne", sans-serif;
         font-weight: 800;
-        font-size: clamp(10px, 1.8vw, 13px);
+        font-size: 13px;
         color: #fff;
       }
 
       .header-info {
         flex: 1;
-        min-width: 0; /* allow truncation */
       }
       .header-name {
         font-family: "Syne", sans-serif;
         font-weight: 700;
-        font-size: clamp(13px, 2.2vw, 15px);
+        font-size: 15px;
         letter-spacing: 0.02em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
       .header-status {
-        font-size: clamp(10px, 1.8vw, 11.5px);
+        font-size: 11.5px;
         color: var(--text-dim);
         display: flex;
         align-items: center;
@@ -163,17 +128,15 @@
         background: var(--accent3);
         border-radius: 50%;
         box-shadow: 0 0 8px var(--accent3);
-        flex-shrink: 0;
       }
 
       .header-actions {
         display: flex;
-        gap: clamp(4px, 1vw, 8px);
-        flex-shrink: 0;
+        gap: 8px;
       }
       .icon-btn {
-        width: clamp(30px, 5.5vw, 36px);
-        height: clamp(30px, 5.5vw, 36px);
+        width: 36px;
+        height: 36px;
         border: 1px solid var(--border);
         background: rgba(255, 255, 255, 0.04);
         border-radius: 10px;
@@ -186,13 +149,6 @@
           border-color 0.2s,
           transform 0.15s;
         color: var(--text-dim);
-        /* Larger touch target on mobile without changing visual size */
-        position: relative;
-      }
-      .icon-btn::after {
-        content: "";
-        position: absolute;
-        inset: -6px;
       }
       .icon-btn:hover {
         background: rgba(124, 106, 255, 0.15);
@@ -206,14 +162,11 @@
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
-        padding: clamp(14px, 3vh, 24px) clamp(12px, 3vw, 20px)
-          clamp(8px, 1.5vh, 16px);
+        padding: 24px 20px 16px;
         scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
       }
       #scroll-area::-webkit-scrollbar {
-        width: 3px;
+        width: 4px;
       }
       #scroll-area::-webkit-scrollbar-track {
         background: transparent;
@@ -227,7 +180,7 @@
         list-style: none;
         display: flex;
         flex-direction: column;
-        gap: clamp(5px, 1vh, 8px);
+        gap: 8px;
         min-height: 100%;
         justify-content: flex-end;
       }
@@ -237,7 +190,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        margin: clamp(10px, 2vh, 16px) 0 clamp(4px, 1vh, 8px);
+        margin: 16px 0 8px;
         opacity: 0;
       }
       .date-divider::before,
@@ -259,7 +212,7 @@
       .msg-row {
         display: flex;
         align-items: flex-end;
-        gap: clamp(6px, 1.5vw, 10px);
+        gap: 10px;
         opacity: 0;
         transform: translateY(16px);
       }
@@ -268,27 +221,25 @@
       }
 
       .msg-avatar {
-        width: clamp(22px, 4.5vw, 28px);
-        height: clamp(22px, 4.5vw, 28px);
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         background: linear-gradient(135deg, #ff6a9b, #7c6aff);
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: clamp(8px, 1.5vw, 10px);
+        font-size: 10px;
         font-weight: 700;
         color: #fff;
         margin-bottom: 2px;
-        /* Hide on very small screens to give messages more room */
       }
       .msg-row.outgoing .msg-avatar {
         background: linear-gradient(135deg, var(--accent), #a56aff);
       }
 
       .msg-bubble-wrap {
-        /* Wider bubble on small screens */
-        max-width: min(78%, calc(100vw - 80px));
+        max-width: 78%;
         display: flex;
         flex-direction: column;
         gap: 3px;
@@ -298,16 +249,16 @@
       }
 
       .msg-sender {
-        font-size: clamp(9px, 1.6vw, 10.5px);
+        font-size: 10.5px;
         color: var(--text-dim);
         padding: 0 4px;
         letter-spacing: 0.03em;
       }
 
       .msg-bubble {
-        padding: clamp(8px, 1.5vw, 10px) clamp(12px, 2.5vw, 15px);
+        padding: 10px 15px;
         border-radius: var(--radius);
-        font-size: clamp(13px, 2.2vw, 14px);
+        font-size: 14px;
         line-height: 1.55;
         position: relative;
         word-break: break-word;
@@ -331,7 +282,7 @@
       }
 
       .msg-time {
-        font-size: clamp(9px, 1.4vw, 10px);
+        font-size: 10px;
         color: var(--text-dim);
         padding: 0 4px;
       }
@@ -352,23 +303,16 @@
         display: none;
         gap: 2px;
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
       }
       .msg-bubble:hover .reaction-pill {
         display: flex;
-      }
-      /* Show reactions on touch-hold (active state) on mobile */
-      @media (hover: none) {
-        .msg-bubble:active .reaction-pill {
-          display: flex;
-        }
       }
 
       /* ── TYPING INDICATOR ── */
       #typing-indicator {
         display: none;
         align-items: center;
-        gap: clamp(6px, 1.5vw, 10px);
+        gap: 10px;
         padding: 4px 0 8px;
         opacity: 0;
       }
@@ -376,8 +320,8 @@
         display: flex;
       }
       .typing-avatar {
-        width: clamp(22px, 4.5vw, 28px);
-        height: clamp(22px, 4.5vw, 28px);
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         background: linear-gradient(135deg, #ff6a9b, #7c6aff);
         flex-shrink: 0;
@@ -387,7 +331,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius);
         border-bottom-left-radius: 6px;
-        padding: clamp(9px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+        padding: 12px 16px;
         display: flex;
         gap: 5px;
         align-items: center;
@@ -401,10 +345,8 @@
 
       /* ── COMPOSE AREA ── */
       #compose {
-        padding: clamp(8px, 1.5vh, 12px) clamp(10px, 3vw, 16px)
-          clamp(10px, 2vh, 18px);
+        padding: 12px 16px 18px;
         backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
         background: rgba(10, 10, 15, 0.75);
         border-top: 1px solid var(--border);
         flex-shrink: 0;
@@ -413,11 +355,11 @@
       .compose-row {
         display: flex;
         align-items: flex-end;
-        gap: clamp(6px, 1.5vw, 10px);
+        gap: 10px;
         background: var(--surface2);
         border: 1px solid var(--border);
         border-radius: 26px;
-        padding: 6px 6px 6px clamp(10px, 3vw, 16px);
+        padding: 6px 6px 6px 16px;
         transition:
           border-color 0.25s,
           box-shadow 0.25s;
@@ -434,12 +376,11 @@
         outline: none;
         color: var(--text);
         font-family: "DM Sans", sans-serif;
-        font-size: clamp(14px, 2.2vw, 15px); /* min 14px prevents iOS zoom */
+        font-size: 14px;
         resize: none;
         line-height: 1.5;
         max-height: 120px;
         padding: 6px 0;
-        min-width: 0;
       }
       #input::placeholder {
         color: var(--text-dim);
@@ -447,14 +388,14 @@
 
       .compose-actions {
         display: flex;
-        gap: clamp(3px, 1vw, 6px);
+        gap: 6px;
         align-items: center;
         flex-shrink: 0;
       }
 
       .attach-btn {
-        width: clamp(28px, 5vw, 34px);
-        height: clamp(28px, 5vw, 34px);
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: transparent;
         border: none;
@@ -466,23 +407,15 @@
         transition:
           color 0.2s,
           transform 0.2s;
-        flex-shrink: 0;
       }
       .attach-btn:hover {
         color: var(--accent);
         transform: rotate(15deg) scale(1.1);
       }
 
-      /* Hide emoji / attach btns on very narrow screens to save space */
-      @media (max-width: 360px) {
-        .attach-btn:not(#emoji-btn) {
-          display: none;
-        }
-      }
-
       #send-btn {
-        width: clamp(34px, 6vw, 38px);
-        height: clamp(34px, 6vw, 38px);
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--accent), #a56aff);
         border: none;
@@ -498,8 +431,6 @@
         flex-shrink: 0;
         position: relative;
         overflow: hidden;
-        /* Larger touch target */
-        touch-action: manipulation;
       }
       #send-btn::after {
         content: "";
@@ -537,36 +468,27 @@
       /* ── TOAST ── */
       #toast {
         position: fixed;
-        bottom: calc(90px + var(--safe-bottom));
+        bottom: 90px;
         left: 50%;
         transform: translateX(-50%) translateY(20px);
         background: var(--surface2);
         border: 1px solid var(--border);
         padding: 8px 18px;
         border-radius: 20px;
-        font-size: clamp(11px, 2vw, 12.5px);
+        font-size: 12.5px;
         color: var(--text-dim);
         opacity: 0;
         pointer-events: none;
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         white-space: nowrap;
         z-index: 100;
-        max-width: calc(100vw - 40px);
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
 
       /* ── SCROLL TO BOTTOM ── */
       #scroll-btn {
         position: fixed;
-        bottom: calc(90px + var(--safe-bottom));
-        /* Responsive right positioning: near edge on desktop, slightly inset on mobile */
-        right: clamp(
-          12px,
-          calc(50vw - 340px + 16px),
-          calc(50vw - 340px + 16px)
-        );
+        bottom: 90px;
+        right: calc(50% - 340px);
         width: 38px;
         height: 38px;
         background: var(--surface2);
@@ -581,8 +503,6 @@
         transition: opacity 0.3s;
         color: var(--text-dim);
         z-index: 10;
-        flex-wrap: nowrap;
-        gap: 0;
       }
       #scroll-btn.visible {
         opacity: 1;
@@ -598,14 +518,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: clamp(8px, 2vh, 12px);
-        padding: clamp(30px, 8vh, 60px) 20px;
+        gap: 12px;
+        padding: 60px 20px;
         text-align: center;
         opacity: 0;
       }
       .empty-icon {
-        width: clamp(48px, 10vw, 64px);
-        height: clamp(48px, 10vw, 64px);
+        width: 64px;
+        height: 64px;
         background: linear-gradient(
           135deg,
           rgba(124, 106, 255, 0.15),
@@ -616,15 +536,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: clamp(20px, 4vw, 28px);
+        font-size: 28px;
       }
       .empty-title {
         font-family: "Syne", sans-serif;
         font-weight: 700;
-        font-size: clamp(14px, 2.5vw, 17px);
+        font-size: 17px;
       }
       .empty-sub {
-        font-size: clamp(12px, 2vw, 13px);
+        font-size: 13px;
         color: var(--text-dim);
         max-width: 220px;
         line-height: 1.6;
@@ -643,73 +563,98 @@
         height: 18px;
         padding: 0 5px;
         font-weight: 700;
-        margin-left: 4px;
+        margin-left: 6px;
       }
+      /* ================= RESPONSIVE FIX ================= */
 
-      /* ── TABLET (640px – 1024px) ── */
-      @media (min-width: 640px) and (max-width: 1023px) {
+      @media (max-width: 768px) {
         #app {
-          /* Slight side padding to breathe on tablet */
-          padding-left: clamp(0px, 2vw, 20px);
-          padding-right: clamp(0px, 2vw, 20px);
+          max-width: 100%;
         }
-      }
 
-      /* ── DESKTOP (≥1024px) ── */
-      @media (min-width: 1024px) {
-        #app {
-          /* Floating card feel on large screens */
-          margin: 0 auto;
-          border-left: 1px solid var(--border);
-          border-right: 1px solid var(--border);
-          box-shadow:
-            0 0 80px rgba(124, 106, 255, 0.08),
-            0 0 0 1px rgba(255, 255, 255, 0.03);
+        #header {
+          padding: 14px 16px;
+        }
+
+        .header-name {
+          font-size: 14px;
+        }
+
+        .header-status {
+          font-size: 10px;
+        }
+
+        #scroll-area {
+          padding: 16px 12px 10px;
+        }
+
+        .msg-bubble-wrap {
+          max-width: 85%;
+        }
+
+        .msg-bubble {
+          font-size: 13px;
+          padding: 8px 12px;
+        }
+
+        .msg-avatar {
+          width: 24px;
+          height: 24px;
+          font-size: 9px;
+        }
+
+        #compose {
+          padding: 10px 10px 14px;
+        }
+
+        .compose-row {
+          padding: 5px 5px 5px 12px;
+        }
+
+        #input {
+          font-size: 13px;
+        }
+
+        #send-btn {
+          width: 34px;
+          height: 34px;
+        }
+
+        .attach-btn {
+          width: 30px;
+          height: 30px;
         }
 
         #scroll-btn {
-          right: calc(50% - 360px + 12px);
+          right: 16px;
+          bottom: 80px;
         }
       }
 
-      /* ── LANDSCAPE MOBILE ── */
-      @media (max-height: 500px) and (orientation: landscape) {
-        #header {
-          padding-top: 8px;
-          padding-bottom: 6px;
-        }
-        #compose {
-          padding-top: 6px;
-          padding-bottom: 8px;
-        }
-        #scroll-area {
-          padding-top: 10px;
-        }
-        .msg-avatar,
-        .typing-avatar {
-          display: none; /* reclaim horizontal space */
-        }
+      /* Extra small devices */
+      @media (max-width: 480px) {
         .msg-bubble-wrap {
-          max-width: min(85%, calc(100vw - 40px));
+          max-width: 90%;
         }
-      }
 
-      /* ── KEYBOARD OPEN (small height) ── */
-      @media (max-height: 400px) {
-        .header-status {
-          display: none;
+        .msg-bubble {
+          font-size: 12.5px;
         }
-        .avatar-ring {
+
+        .header-actions {
+          gap: 4px;
+        }
+
+        .icon-btn {
           width: 30px;
           height: 30px;
         }
       }
 
-      /* ── HIGH-DPI / RETINA adjustments ── */
-      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        .status-dot {
-          box-shadow: 0 0 6px var(--accent3);
-        }
+      /* Prevent zoom issues on mobile */
+      input,
+      textarea {
+        font-size: 16px;
       }
     </style>
   </head>
@@ -734,13 +679,13 @@
               stroke-width="1.5"
               stroke-dasharray="4 3"
             />
-            <defs>
-              <linearGradient id="ring-grad" x1="0" y1="0" x2="42" y2="42">
-                <stop offset="0%" stop-color="#7c6aff" />
-                <stop offset="100%" stop-color="#ff6a9b" />
-              </linearGradient>
-            </defs>
           </svg>
+          <defs>
+            <linearGradient id="ring-grad" x1="0" y1="0" x2="42" y2="42">
+              <stop offset="0%" stop-color="#7c6aff" />
+              <stop offset="100%" stop-color="#ff6a9b" />
+            </linearGradient>
+          </defs>
           <div class="avatar-inner">LC</div>
         </div>
         <div class="header-info">
@@ -838,17 +783,9 @@
             rows="1"
             placeholder="Type a message…"
             autocomplete="off"
-            autocorrect="on"
-            autocapitalize="sentences"
-            spellcheck="true"
           ></textarea>
           <div class="compose-actions">
-            <button
-              class="attach-btn"
-              id="emoji-btn"
-              type="button"
-              title="Emoji"
-            >
+            <button class="attach-btn" type="button" title="Emoji">
               <svg
                 width="16"
                 height="16"
@@ -889,6 +826,7 @@
 
     <div id="toast"></div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
       gsap.registerPlugin(ScrollToPlugin, TextPlugin);
 
@@ -915,8 +853,8 @@
 
         for (let i = 0; i < 4; i++) {
           orbs.push({
-            x: Math.random() * (W || 400),
-            y: Math.random() * (H || 800),
+            x: Math.random() * W,
+            y: Math.random() * H,
             r: 150 + Math.random() * 200,
             color: colors[i % colors.length],
             vx: (Math.random() - 0.5) * 0.3,
@@ -946,23 +884,6 @@
         }
         draw();
       })();
-
-      // ── HANDLE VIRTUAL KEYBOARD (iOS / Android) ─────────────────────
-      // When the soft keyboard opens, the viewport shrinks. We detect this
-      // and ensure the compose bar stays pinned above it.
-      if ("visualViewport" in window) {
-        const vvp = window.visualViewport;
-        function onViewportResize() {
-          const app = document.getElementById("app");
-          const keyboardHeight =
-            window.innerHeight - vvp.height - vvp.offsetTop;
-          // Lift compose area above keyboard
-          app.style.height = vvp.height + "px";
-          app.style.marginTop = vvp.offsetTop + "px";
-        }
-        vvp.addEventListener("resize", onViewportResize);
-        vvp.addEventListener("scroll", onViewportResize);
-      }
 
       // ── TYPING INDICATOR ANIMATION ─────────────────────────────────
       const dots = [d1, d2, d3];
@@ -1075,6 +996,7 @@
 
         const isFirst = msgCount === 1;
         if (isFirst) {
+          // date divider
           const div = document.createElement("li");
           div.className = "date-divider";
           div.innerHTML = `<span>Today</span>`;
@@ -1089,17 +1011,18 @@
         const letters = avatarLetters[name] || name.slice(0, 2).toUpperCase();
 
         li.innerHTML = `
-          <div class="msg-avatar">${letters}</div>
-          <div class="msg-bubble-wrap">
-            <div class="msg-sender">${name}</div>
-            <div class="msg-bubble">
-              ${escapeHtml(text)}
-              <span class="reaction-pill">${emoji}</span>
-            </div>
-            <div class="msg-time">${getTime()}</div>
-          </div>`;
+        <div class="msg-avatar">${letters}</div>
+        <div class="msg-bubble-wrap">
+          <div class="msg-sender">${name}</div>
+          <div class="msg-bubble">
+            ${escapeHtml(text)}
+            <span class="reaction-pill">${emoji}</span>
+          </div>
+          <div class="msg-time">${getTime()}</div>
+        </div>`;
         messagesEl.appendChild(li);
 
+        // Animate in
         gsap.to(li, {
           opacity: 1,
           y: 0,
@@ -1110,6 +1033,7 @@
           },
         });
 
+        // Bubble pop
         const bubble = li.querySelector(".msg-bubble");
         gsap.from(bubble, {
           scale: 0.75,
@@ -1118,6 +1042,7 @@
           ease: "back.out(2.2)",
         });
 
+        // Scroll
         if (isAtBottom || isOutgoing) {
           gsap.to(scrollArea, {
             scrollTo: { y: scrollArea.scrollHeight + 200 },
@@ -1128,11 +1053,11 @@
           unreadCount++;
           scrollBtn.classList.add("visible");
           scrollBtn.innerHTML = `
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-              <polyline points="2,4 7,10 12,4"/>
-            </svg>
-            ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ""}
-          `;
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="2,4 7,10 12,4"/>
+          </svg>
+          ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ""}
+        `;
         }
       }
 
@@ -1149,10 +1074,8 @@
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const colors = ["#7c6aff", "#ff6a9b", "#6affd4", "#ffda6a", "#ff8c6a"];
-        // Fewer particles on mobile for performance
-        const count = window.innerWidth < 480 ? 6 : 10;
 
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < 10; i++) {
           const p = document.createElement("div");
           p.className = "particle";
           p.style.background = colors[i % colors.length];
@@ -1160,7 +1083,7 @@
           p.style.top = cy + "px";
           document.body.appendChild(p);
 
-          const angle = (i / count) * Math.PI * 2;
+          const angle = (i / 10) * Math.PI * 2;
           const dist = 40 + Math.random() * 60;
           gsap.to(p, {
             x: Math.cos(angle) * dist,
@@ -1286,11 +1209,14 @@
         inputEl.value = "";
         inputEl.style.height = "auto";
 
+        // Simulate incoming reply for demo
         clearTimeout(typingTimeout);
         setTimeout(() => {
           showTyping();
           typingTimeout = setTimeout(() => {
             hideTyping();
+            // Demo: echo back (remove if using real socket)
+            // addMessage('Got it! 👍', false);
           }, 2200);
         }, 600);
       }
@@ -1334,13 +1260,6 @@
           borderColor: "rgba(124,106,255,0.6)",
           duration: 0.3,
         });
-        // Scroll to bottom so new messages aren't hidden under keyboard
-        setTimeout(() => {
-          gsap.to(scrollArea, {
-            scrollTo: { y: scrollArea.scrollHeight },
-            duration: 0.3,
-          });
-        }, 350);
       });
       inputEl.addEventListener("blur", () => {
         gsap.to(".compose-row", {
