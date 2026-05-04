@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Chat — Live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --surface2: #1a1a24;
+        --border: rgba(255, 255, 255, 0.07);
+        --accent: #7c6aff;
+        --accent2: #ff6a9b;
+        --accent3: #6affd4;
+        --text: #f0eeff;
+        --text-dim: rgba(240, 238, 255, 0.45);
+        --glow: rgba(124, 106, 255, 0.35);
+        --msg-out-bg: linear-gradient(135deg, #7c6aff, #a56aff);
+        --msg-in-bg: #1a1a24;
+        --radius: 20px;
+        --radius-sm: 12px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        overflow: hidden;
+      }
+
+      /* ── ANIMATED BACKGROUND ── */
+      #bg-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* ── APP SHELL ── */
+      #app {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      /* ── HEADER ── */
+      #header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 24px 14px;
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(20px);
+        background: rgba(10, 10, 15, 0.6);
+        flex-shrink: 0;
+      }
+
+      .avatar-ring {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+      }
+      .avatar-ring svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .avatar-inner {
+        position: absolute;
+        inset: 5px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 13px;
+        color: #fff;
+      }
+
+      .header-info {
+        flex: 1;
+      }
+      .header-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+      }
+      .header-status {
+        font-size: 11.5px;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 2px;
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--accent3);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--accent3);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          transform 0.15s;
+        color: var(--text-dim);
+      }
+      .icon-btn:hover {
+        background: rgba(124, 106, 255, 0.15);
+        border-color: var(--accent);
+        color: var(--text);
+        transform: scale(1.08);
+      }
+
+      /* ── MESSAGE AREA ── */
+      #scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 24px 20px 16px;
+        scroll-behavior: smooth;
+      }
+      #scroll-area::-webkit-scrollbar {
+        width: 4px;
+      }
+      #scroll-area::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #scroll-area::-webkit-scrollbar-thumb {
+        background: rgba(124, 106, 255, 0.3);
+        border-radius: 2px;
+      }
+
+      #messages {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 100%;
+        justify-content: flex-end;
+      }
+
+      /* ── DATE DIVIDER ── */
+      .date-divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 16px 0 8px;
+        opacity: 0;
+      }
+      .date-divider::before,
+      .date-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .date-divider span {
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        white-space: nowrap;
+      }
+
+      /* ── MESSAGE ITEM ── */
+      .msg-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      .msg-row.outgoing {
+        flex-direction: row-reverse;
+      }
+
+      .msg-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6a9b, #7c6aff);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 2px;
+      }
+      .msg-row.outgoing .msg-avatar {
+        background: linear-gradient(135deg, var(--accent), #a56aff);
+      }
+
+      .msg-bubble-wrap {
+        max-width: 78%;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .msg-row.outgoing .msg-bubble-wrap {
+        align-items: flex-end;
+      }
+
+      .msg-sender {
+        font-size: 10.5px;
+        color: var(--text-dim);
+        padding: 0 4px;
+        letter-spacing: 0.03em;
+      }
+
+      .msg-bubble {
+        padding: 10px 15px;
+        border-radius: var(--radius);
+        font-size: 14px;
+        line-height: 1.55;
+        position: relative;
+        word-break: break-word;
+        cursor: default;
+      }
+      .msg-row.incoming .msg-bubble {
+        background: var(--msg-in-bg);
+        border: 1px solid var(--border);
+        border-bottom-left-radius: 6px;
+        color: var(--text);
+      }
+      .msg-row.outgoing .msg-bubble {
+        background: var(--msg-out-bg);
+        border-bottom-right-radius: 6px;
+        color: #fff;
+        box-shadow: 0 4px 24px rgba(124, 106, 255, 0.35);
+      }
+      .msg-bubble:hover {
+        transform: scale(1.01);
+        transition: transform 0.2s;
+      }
+
+      .msg-time {
+        font-size: 10px;
+        color: var(--text-dim);
+        padding: 0 4px;
+      }
+      .msg-row.outgoing .msg-time {
+        text-align: right;
+      }
+
+      /* Reaction pill */
+      .reaction-pill {
+        position: absolute;
+        bottom: -10px;
+        right: 10px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1px 6px;
+        font-size: 11px;
+        display: none;
+        gap: 2px;
+        backdrop-filter: blur(10px);
+      }
+      .msg-bubble:hover .reaction-pill {
+        display: flex;
+      }
+
+      /* ── TYPING INDICATOR ── */
+      #typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 0 8px;
+        opacity: 0;
+      }
+      #typing-indicator.visible {
+        display: flex;
+      }
+      .typing-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6a9b, #7c6aff);
+        flex-shrink: 0;
+      }
+      .typing-bubble {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        border-bottom-left-radius: 6px;
+        padding: 12px 16px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-dim);
+        border-radius: 50%;
+      }
+
+      /* ── COMPOSE AREA ── */
+      #compose {
+        padding: 12px 16px 18px;
+        backdrop-filter: blur(24px);
+        background: rgba(10, 10, 15, 0.75);
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+
+      .compose-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 26px;
+        padding: 6px 6px 6px 16px;
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s;
+      }
+      .compose-row:focus-within {
+        border-color: rgba(124, 106, 255, 0.6);
+        box-shadow: 0 0 0 3px rgba(124, 106, 255, 0.12);
+      }
+
+      #input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        resize: none;
+        line-height: 1.5;
+        max-height: 120px;
+        padding: 6px 0;
+      }
+      #input::placeholder {
+        color: var(--text-dim);
+      }
+
+      .compose-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .attach-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          transform 0.2s;
+      }
+      .attach-btn:hover {
+        color: var(--accent);
+        transform: rotate(15deg) scale(1.1);
+      }
+
+      #send-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #a56aff);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 16px rgba(124, 106, 255, 0.4);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      #send-btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: scale(0);
+      }
+      #send-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 24px rgba(124, 106, 255, 0.55);
+      }
+      #send-btn:active::after {
+        animation: ripple 0.4s ease-out;
+      }
+
+      @keyframes ripple {
+        to {
+          transform: scale(2.5);
+          opacity: 0;
+        }
+      }
+
+      /* ── PARTICLE BURST ── */
+      .particle {
+        position: fixed;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 999;
+      }
+
+      /* ── TOAST ── */
+      #toast {
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+        opacity: 0;
+        pointer-events: none;
+        backdrop-filter: blur(16px);
+        white-space: nowrap;
+        z-index: 100;
+      }
+
+      /* ── SCROLL TO BOTTOM ── */
+      #scroll-btn {
+        position: fixed;
+        bottom: 90px;
+        right: calc(50% - 340px);
+        width: 38px;
+        height: 38px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        color: var(--text-dim);
+        z-index: 10;
+      }
+      #scroll-btn.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #scroll-btn:hover {
+        color: var(--accent);
+      }
+
+      /* ── EMPTY STATE ── */
+      #empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 60px 20px;
+        text-align: center;
+        opacity: 0;
+      }
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 106, 255, 0.15),
+          rgba(255, 106, 155, 0.15)
+        );
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+      }
+      .empty-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+      }
+      .empty-sub {
+        font-size: 13px;
+        color: var(--text-dim);
+        max-width: 220px;
+        line-height: 1.6;
+      }
+
+      /* ── UNREAD BADGE ── */
+      .unread-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 10px;
+        font-size: 10px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        font-weight: 700;
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="app">
+      <!-- Header -->
+      <div id="header">
+        <div class="avatar-ring">
+          <svg
+            viewBox="0 0 42 42"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="21"
+              cy="21"
+              r="19.5"
+              stroke="url(#ring-grad)"
+              stroke-width="1.5"
+              stroke-dasharray="4 3"
+            />
+          </svg>
+          <defs>
+            <linearGradient id="ring-grad" x1="0" y1="0" x2="42" y2="42">
+              <stop offset="0%" stop-color="#7c6aff" />
+              <stop offset="100%" stop-color="#ff6a9b" />
+            </linearGradient>
+          </defs>
+          <div class="avatar-inner">LC</div>
+        </div>
+        <div class="header-info">
+          <div class="header-name">Live Chat</div>
+          <div class="header-status">
+            <span class="status-dot"></span>
+            <span id="status-text">Connected</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="icon-btn" title="Search" id="search-btn">
+            <svg
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="6.5" cy="6.5" r="5" />
+              <line x1="10" y1="10" x2="14" y2="14" />
+            </svg>
+          </div>
+          <div class="icon-btn" title="Info" id="info-btn">
+            <svg
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="7.5" cy="7.5" r="6.5" />
+              <line x1="7.5" y1="5.5" x2="7.5" y2="5.5" stroke-width="2.5" />
+              <line x1="7.5" y1="8" x2="7.5" y2="11" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="scroll-area">
+        <ul id="messages">
+          <li id="empty-state">
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">Start the conversation</div>
+            <div class="empty-sub">Messages appear here in real time</div>
+          </li>
+        </ul>
+
+        <!-- Typing indicator -->
+        <div id="typing-indicator">
+          <div class="typing-avatar"></div>
+          <div class="typing-bubble">
+            <div class="dot" id="d1"></div>
+            <div class="dot" id="d2"></div>
+            <div class="dot" id="d3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll-to-bottom button -->
+      <div id="scroll-btn">
+        <svg
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+        >
+          <polyline points="2,4 7,10 12,4" />
+        </svg>
+      </div>
+
+      <!-- Compose -->
+      <div id="compose">
+        <div class="compose-row">
+          <button class="attach-btn" type="button" title="Attach">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path
+                d="M14 6l-6 6a3 3 0 01-4.2-4.2l6-6a1.5 1.5 0 012.1 2.1l-6 6a.5.5 0 01-.7-.7l5.3-5.3"
+              />
+            </svg>
+          </button>
+          <textarea
+            id="input"
+            rows="1"
+            placeholder="Type a message…"
+            autocomplete="off"
+          ></textarea>
+          <div class="compose-actions">
+            <button class="attach-btn" type="button" title="Emoji">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <circle cx="8" cy="8" r="7" />
+                <path d="M5.5 9.5s.8 1.5 2.5 1.5 2.5-1.5 2.5-1.5" />
+                <circle cx="5.5" cy="6.5" r=".75" fill="currentColor" />
+                <circle cx="10.5" cy="6.5" r=".75" fill="currentColor" />
+              </svg>
+            </button>
+            <button id="send-btn" type="button" title="Send">
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="transform: translateX(1px)"
+              >
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon
+                  points="22 2 15 22 11 13 2 9 22 2"
+                  fill="currentColor"
+                  stroke="none"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      gsap.registerPlugin(ScrollToPlugin, TextPlugin);
+
+      // ── BACKGROUND CANVAS ──────────────────────────────────────────
+      (function () {
+        const canvas = document.getElementById("bg-canvas");
+        const ctx = canvas.getContext("2d");
+        let W,
+          H,
+          orbs = [];
+
+        function resize() {
+          W = canvas.width = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        const colors = [
+          "rgba(124,106,255,",
+          "rgba(255,106,155,",
+          "rgba(106,255,212,",
+        ];
+
+        for (let i = 0; i < 4; i++) {
+          orbs.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: 150 + Math.random() * 200,
+            color: colors[i % colors.length],
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            opacity: 0.06 + Math.random() * 0.08,
+          });
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          orbs.forEach((o) => {
+            o.x += o.vx;
+            o.y += o.vy;
+            if (o.x < -o.r) o.x = W + o.r;
+            if (o.x > W + o.r) o.x = -o.r;
+            if (o.y < -o.r) o.y = H + o.r;
+            if (o.y > H + o.r) o.y = -o.r;
+            const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+            g.addColorStop(0, o.color + o.opacity + ")");
+            g.addColorStop(1, o.color + "0)");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          requestAnimationFrame(draw);
+        }
+        draw();
+      })();
+
+      // ── TYPING INDICATOR ANIMATION ─────────────────────────────────
+      const dots = [d1, d2, d3];
+      const dotTl = gsap.timeline({ repeat: -1, paused: true });
+      dots.forEach((d, i) => {
+        dotTl
+          .to(d, { y: -5, duration: 0.35, ease: "power2.out" }, i * 0.12)
+          .to(d, { y: 0, duration: 0.35, ease: "bounce.out" }, i * 0.12 + 0.35);
+      });
+
+      // ── STATUS DOT PULSE ───────────────────────────────────────────
+      gsap.to(".status-dot", {
+        scale: 1.5,
+        opacity: 0.5,
+        duration: 1.1,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // ── AVATAR RING SPIN ───────────────────────────────────────────
+      gsap.to(".avatar-ring svg", {
+        rotation: 360,
+        duration: 12,
+        ease: "none",
+        repeat: -1,
+        transformOrigin: "50% 50%",
+      });
+
+      // ── HEADER ENTRANCE ───────────────────────────────────────────
+      gsap.from("#header", {
+        y: -60,
+        opacity: 0,
+        duration: 0.8,
+        ease: "expo.out",
+        delay: 0.1,
+      });
+      gsap.from("#compose", {
+        y: 60,
+        opacity: 0,
+        duration: 0.8,
+        ease: "expo.out",
+        delay: 0.2,
+      });
+
+      // ── EMPTY STATE ────────────────────────────────────────────────
+      gsap.to("#empty-state", {
+        opacity: 1,
+        duration: 0.6,
+        delay: 0.5,
+        ease: "power2.out",
+      });
+      gsap.from("#empty-state .empty-icon", {
+        scale: 0.5,
+        rotation: -15,
+        duration: 0.8,
+        delay: 0.6,
+        ease: "elastic.out(1, 0.6)",
+      });
+
+      // ── SOCKET ─────────────────────────────────────────────────────
+      let socket;
+      try {
+        socket = io();
+      } catch (e) {
+        socket = { emit: () => {}, on: () => {} };
+      }
+
+      const messagesEl = document.getElementById("messages");
+      const inputEl = document.getElementById("input");
+      const sendBtn = document.getElementById("send-btn");
+      const scrollArea = document.getElementById("scroll-area");
+      const scrollBtn = document.getElementById("scroll-btn");
+      const toastEl = document.getElementById("toast");
+      const emptyState = document.getElementById("empty-state");
+      const typingEl = document.getElementById("typing-indicator");
+
+      let msgCount = 0;
+      let isAtBottom = true;
+      let unreadCount = 0;
+      let typingTimeout;
+
+      const names = ["You", "Alex", "Sam", "Jordan"];
+      const avatarLetters = { You: "YO", Alex: "AX", Sam: "SM", Jordan: "JD" };
+      const emojis = ["✨", "🔥", "💬", "⚡", "🎯"];
+
+      function getTime() {
+        return new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function hideEmpty() {
+        if (emptyState.parentNode) {
+          gsap.to(emptyState, {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => emptyState.remove(),
+          });
+        }
+      }
+
+      // ── ADD MESSAGE ────────────────────────────────────────────────
+      function addMessage(text, isOutgoing) {
+        hideEmpty();
+        msgCount++;
+
+        const isFirst = msgCount === 1;
+        if (isFirst) {
+          // date divider
+          const div = document.createElement("li");
+          div.className = "date-divider";
+          div.innerHTML = `<span>Today</span>`;
+          messagesEl.appendChild(div);
+          gsap.to(div, { opacity: 1, duration: 0.5, delay: 0.1 });
+        }
+
+        const li = document.createElement("li");
+        li.className = `msg-row ${isOutgoing ? "outgoing" : "incoming"}`;
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        const name = isOutgoing ? "You" : names[1 + (msgCount % 3)];
+        const letters = avatarLetters[name] || name.slice(0, 2).toUpperCase();
+
+        li.innerHTML = `
+        <div class="msg-avatar">${letters}</div>
+        <div class="msg-bubble-wrap">
+          <div class="msg-sender">${name}</div>
+          <div class="msg-bubble">
+            ${escapeHtml(text)}
+            <span class="reaction-pill">${emoji}</span>
+          </div>
+          <div class="msg-time">${getTime()}</div>
+        </div>`;
+        messagesEl.appendChild(li);
+
+        // Animate in
+        gsap.to(li, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "expo.out",
+          onComplete: () => {
+            if (isOutgoing) fireParticles();
+          },
+        });
+
+        // Bubble pop
+        const bubble = li.querySelector(".msg-bubble");
+        gsap.from(bubble, {
+          scale: 0.75,
+          transformOrigin: isOutgoing ? "bottom right" : "bottom left",
+          duration: 0.45,
+          ease: "back.out(2.2)",
+        });
+
+        // Scroll
+        if (isAtBottom || isOutgoing) {
+          gsap.to(scrollArea, {
+            scrollTo: { y: scrollArea.scrollHeight + 200 },
+            duration: 0.5,
+            ease: "power3.out",
+          });
+        } else {
+          unreadCount++;
+          scrollBtn.classList.add("visible");
+          scrollBtn.innerHTML = `
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="2,4 7,10 12,4"/>
+          </svg>
+          ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ""}
+        `;
+        }
+      }
+
+      function escapeHtml(t) {
+        return t
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      // ── PARTICLE BURST ─────────────────────────────────────────────
+      function fireParticles() {
+        const rect = sendBtn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const colors = ["#7c6aff", "#ff6a9b", "#6affd4", "#ffda6a", "#ff8c6a"];
+
+        for (let i = 0; i < 10; i++) {
+          const p = document.createElement("div");
+          p.className = "particle";
+          p.style.background = colors[i % colors.length];
+          p.style.left = cx + "px";
+          p.style.top = cy + "px";
+          document.body.appendChild(p);
+
+          const angle = (i / 10) * Math.PI * 2;
+          const dist = 40 + Math.random() * 60;
+          gsap.to(p, {
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist,
+            scale: 0,
+            opacity: 0,
+            duration: 0.6 + Math.random() * 0.4,
+            ease: "power2.out",
+            onComplete: () => p.remove(),
+          });
+        }
+      }
+
+      // ── SEND BUTTON ANIMATION ──────────────────────────────────────
+      sendBtn.addEventListener("click", () => {
+        gsap
+          .timeline()
+          .to(sendBtn, { scale: 0.85, duration: 0.1, ease: "power2.in" })
+          .to(sendBtn, { scale: 1.15, duration: 0.15, ease: "back.out(3)" })
+          .to(sendBtn, { scale: 1, duration: 0.2 });
+      });
+
+      // ── ICON BUTTON ANIMATIONS ─────────────────────────────────────
+      document.querySelectorAll(".icon-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          gsap.from(btn, {
+            rotation: -10,
+            duration: 0.4,
+            ease: "elastic.out(1,0.5)",
+          });
+          showToast("Coming soon ✨");
+        });
+      });
+
+      // ── SCROLL TRACKING ────────────────────────────────────────────
+      scrollArea.addEventListener("scroll", () => {
+        const dist =
+          scrollArea.scrollHeight -
+          scrollArea.scrollTop -
+          scrollArea.clientHeight;
+        isAtBottom = dist < 80;
+        if (isAtBottom) {
+          unreadCount = 0;
+          scrollBtn.classList.remove("visible");
+        }
+      });
+
+      scrollBtn.addEventListener("click", () => {
+        gsap.to(scrollArea, {
+          scrollTo: { y: scrollArea.scrollHeight },
+          duration: 0.5,
+          ease: "power3.out",
+        });
+        unreadCount = 0;
+        scrollBtn.classList.remove("visible");
+      });
+
+      // ── TOAST ──────────────────────────────────────────────────────
+      let toastTween;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        if (toastTween) toastTween.kill();
+        toastTween = gsap
+          .timeline()
+          .to(toastEl, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" })
+          .to(toastEl, {
+            opacity: 0,
+            y: 10,
+            duration: 0.3,
+            ease: "power2.in",
+            delay: 1.8,
+          });
+      }
+
+      // ── TEXTAREA AUTO-RESIZE ────────────────────────────────────────
+      inputEl.addEventListener("input", () => {
+        inputEl.style.height = "auto";
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
+      });
+
+      // ── TYPING INDICATOR SHOW/HIDE ─────────────────────────────────
+      function showTyping() {
+        typingEl.classList.add("visible");
+        dotTl.play();
+        gsap.to(typingEl, {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "back.out(2)",
+        });
+        gsap.from(typingEl.querySelector(".typing-bubble"), {
+          scale: 0.8,
+          transformOrigin: "bottom left",
+          duration: 0.3,
+          ease: "back.out(2)",
+        });
+      }
+      function hideTyping() {
+        gsap.to(typingEl, {
+          opacity: 0,
+          y: 8,
+          duration: 0.25,
+          onComplete: () => {
+            typingEl.classList.remove("visible");
+            dotTl.pause();
+          },
+        });
+      }
+
+      // ── SUBMIT ─────────────────────────────────────────────────────
+      function sendMessage() {
+        const text = inputEl.value.trim();
+        if (!text) {
+          gsap.to(".compose-row", {
+            x: [-6, 6, -5, 5, -3, 3, 0],
+            duration: 0.4,
+            ease: "none",
+          });
+          return;
+        }
+        addMessage(text, true);
+        socket.emit("chat message", text);
+        inputEl.value = "";
+        inputEl.style.height = "auto";
+
+        // Simulate incoming reply for demo
+        clearTimeout(typingTimeout);
+        setTimeout(() => {
+          showTyping();
+          typingTimeout = setTimeout(() => {
+            hideTyping();
+            // Demo: echo back (remove if using real socket)
+            // addMessage('Got it! 👍', false);
+          }, 2200);
+        }, 600);
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // ── SOCKET EVENTS ───────────────────────────────────────────────
+      socket.on("chat message", (msg) => {
+        addMessage(msg, false);
+      });
+
+      socket.on("connect", () => {
+        gsap.to(".status-dot", {
+          background: "#6affd4",
+          boxShadow: "0 0 8px #6affd4",
+          duration: 0.4,
+        });
+        document.getElementById("status-text").textContent = "Connected";
+      });
+
+      socket.on("disconnect", () => {
+        gsap.to(".status-dot", {
+          background: "#ff6a9b",
+          boxShadow: "0 0 8px #ff6a9b",
+          duration: 0.4,
+        });
+        document.getElementById("status-text").textContent = "Reconnecting…";
+        showToast("Connection lost. Reconnecting…");
+      });
+
+      // ── INPUT FOCUS RING ────────────────────────────────────────────
+      inputEl.addEventListener("focus", () => {
+        gsap.to(".compose-row", {
+          borderColor: "rgba(124,106,255,0.6)",
+          duration: 0.3,
+        });
+      });
+      inputEl.addEventListener("blur", () => {
+        gsap.to(".compose-row", {
+          borderColor: "rgba(255,255,255,0.07)",
+          duration: 0.3,
+        });
+      });
+    </script>
+  </body>
+</html>
